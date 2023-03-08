@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/lib/pq"
 	"github.com/sagar4797/microservice/controller"
 	"github.com/sagar4797/microservice/db"
 	"github.com/sagar4797/microservice/logger"

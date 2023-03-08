@@ -3,7 +3,7 @@ services:
   servicedb:
     image: postgres:12-alpine
     ports:
-      - 6011:5432
+      - 5432:5432
     volumes:
       - service_db:/var/lib/postgresql/data/
     environment:

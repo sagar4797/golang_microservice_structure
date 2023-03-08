@@ -1,0 +1,67 @@
+version: "3.9"
+services:
+  servicedb:
+    image: postgres:12-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - service_db:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=sagar
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=test_database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sagar -d test_database"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  service:
+    image: service_web_testing
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 6013:8000
+    environment:
+      - PORT=8000
+      - ENV=dev
+      - APP_VERSION=1.0.0
+      - SERVICE_NAME=service
+      - LOG_LEVEL=debug # panic/fatal/error/warn/info/debug/trace
+      - DB_HOST=servicedb
+      - DB_PORT=5432
+      - DB_NAME=test_database
+      - DB_USER=sagar
+      - DB_PASSWORD=secret
+      - DB_SSLMODE=disable
+      - DB_DRIVER=postgres
+      - DB_POOL_MAX_CONN=5
+      - DB_URL=postgres://sagar:secret@servicedb:5432/test_database?sslmode=disable
+      - CORS_ORIGIN=*
+      - CORS_CREDENTIALS=true
+      - CORS_HEADERS=Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization,typesense-admin-key, accept, origin, Cache-Control, X-Requested-With
+      - CORS_METHODS=POST,HEAD,PATCH, OPTIONS, GET, PUT, DELETE
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    depends_on:
+      servicedb:
+        condition: service_healthy
+
+volumes:
+  service_db:
+  typesense-data:
